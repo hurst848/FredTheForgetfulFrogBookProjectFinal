@@ -23,7 +23,7 @@ public class SensorBugTest : MonoBehaviour
 	}
 
 	public static List<Characteristic> Characteristics = new List<Characteristic>
-	{
+	{									   
 		new Characteristic { ServiceUUID = "9DC84838-7619-4F09-A1CE-DDCF63225B10", CharacteristicUUID = "9DC84838-7619-4F09-A1CE-DDCF63225B11", Found = false },
 		new Characteristic { ServiceUUID = "9DC84838-7619-4F09-A1CE-DDCF63225B10", CharacteristicUUID = "9DC84838-7619-4F09-A1CE-DDCF63225B12", Found = false },
 		new Characteristic { ServiceUUID = "3188AC28-72D4-4006-BD96-C6C4BC6153A0", CharacteristicUUID = "3188AC28-72D4-4006-BD96-C6C4BC6153A1", Found = false },
