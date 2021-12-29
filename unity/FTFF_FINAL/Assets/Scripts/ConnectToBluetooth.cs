@@ -13,8 +13,19 @@ public class ConnectToBluetooth : MonoBehaviour
 		public string Name;
 	}
 
-	static BLE_ScannedItem connectedItem;
+    public AudioSource SourceA;
+    public AudioSource SourceB;
+
+    public List<AudioClip> soundTracks;
+
+    private bool currentSource = true; // true = SourceA | false = SourceB
+
+    public float fadeTime = 3.0f;
+
+
+    static BLE_ScannedItem connectedItem;
 	static int Page_Number = -1;
+    private int lastPageNumber;
 
 	public Dropdown dropdown;
 	public Button connectButton;
@@ -126,6 +137,26 @@ public class ConnectToBluetooth : MonoBehaviour
                 }
             } 
         }
+        else
+        {
+            if (Page_Number != lastPageNumber)
+            {
+                lastPageNumber = Page_Number;
+                if (currentSource) // SourceA is currently playing
+                {
+                    StartCoroutine(fadeOutAudio(SourceA, fadeTime));
+                    StartCoroutine(fadeInAudio(SourceB, fadeTime));
+                    currentSource = false;
+                }
+                else // SourceB is currently playing
+                {
+                    StartCoroutine(fadeOutAudio(SourceB, fadeTime));
+                    StartCoroutine(fadeInAudio(SourceA, fadeTime));
+                    currentSource = true;
+                }
+            }
+        }
+
 	}
 
 	public void ConnectToDevice()
@@ -133,11 +164,11 @@ public class ConnectToBluetooth : MonoBehaviour
         PageButton.gameObject.SetActive(true);
 		connectedItem = _scannedItems[dropdown.value];
         connectedToDevice = true;
-		BluetoothLEHardwareInterface.SubscribeCharacteristicWithDeviceAddress(connectedItem.Address, "705CC7B4-AD8D-40BA-9583-FCB7819ED284", "705CC7B4-AD8D-40BA-9583-FCB7819ED284", null, (deviceAddress, characteristric, bytes) => {
-
-			Page_Number = int.Parse(BitConverter.ToString(bytes));
-		});
-
+        BluetoothLEHardwareInterface.SubscribeCharacteristicWithDeviceAddress(connectedItem.Address, "705CC7B4-AD8D-40BA-9583-FCB7819ED284", "705CC7B4-AD8D-40BA-9583-FCB7819ED284", null, (deviceAddress, characteristric, bytes) =>
+        {
+            Page_Number = int.Parse(BitConverter.ToString(bytes));
+        });
+        lastPageNumber = Page_Number;
 		dropdown.gameObject.SetActive(false);
 		connectButton.gameObject.SetActive(false);
 	}
@@ -145,5 +176,32 @@ public class ConnectToBluetooth : MonoBehaviour
     public void UpdateButtonText()
     {
         displayPage.text = Page_Number.ToString(); 
+    }
+
+    public IEnumerator fadeOutAudio(AudioSource _source, float _timeToFade)
+    {
+        float precision = 100.0f;
+        float incrmnt = _timeToFade / precision;
+
+        for (int i = 0; i< precision; i++)
+        {
+            _source.volume -= 1.0f / precision;
+            yield return new WaitForSeconds(incrmnt);
+        }
+
+        yield return null;
+    }
+    public IEnumerator fadeInAudio(AudioSource _source, float _timeToFade)
+    {
+        float precision = 100.0f;
+        float incrmnt = _timeToFade / precision;
+
+        for (int i = 0; i < precision; i++)
+        {
+            _source.volume += 1.0f / precision;
+            yield return new WaitForSeconds(incrmnt);
+        }
+
+        yield return null;
     }
 }

@@ -4,6 +4,15 @@
 #include <BLE2902.h>              
 #define SERVICE_UUID             "705cc7b4-ad8d-40ba-9583-fcb7819ed284"
 #define CHARACTERISTIC1_UUID     "705cc7b4-ad8d-40ba-9583-fcb7819ed284"
+
+#define pin_page_1_2  2
+#define pin_page_3_4  3
+#define pin_page_5_6  5
+#define pin_page_7_8  7
+#define pin_page_9_10 9
+
+
+
 bool deviceConnected = false;
 BLEServer *pServer;
 BLEService *pService;
@@ -29,12 +38,22 @@ class MyCallbacks: public BLECharacteristicCallbacks {
         }
         Serial.println();
         Serial.println("*********");
+        
         pCharacteristic->notify();
       }
     }
 };
 void setupBLE()
 {
+  // Setup read pins 
+  pinMode(pin_page_1_2, INPUT);
+  pinMode(pin_page_3_4, INPUT);
+  pinMode(pin_page_5_6, INPUT);
+  pinMode(pin_page_7_8, INPUT);
+  pinMode(pin_page_9_10, INPUT);
+
+  // Setup BLE device
+  
   BLEDevice::init("Fred the Forgetful Frog");   //Create BLE device 
   pServer = BLEDevice::createServer();   //Create BLE server 
   pServer->setCallbacks(new MyServerCallbacks());   //Set the callback function of the server 
@@ -52,22 +71,15 @@ void setupBLE()
   pAdvertising->start();
 }
 
-// Pins for Reading
 
-int pin_page_1_2 = 2;
-int pin_page_3_4 = 3;
-int pin_page_5_6 = 4;
-int pin_page_7_8 = 5;
-int pin_page_9_10 = 6;
 
 void setup() {
   Serial.begin(115200);
   setupBLE();
-
-  // Setup read pins 
   
 }
 
 void loop() {
    delay(3000);
+  
 }
