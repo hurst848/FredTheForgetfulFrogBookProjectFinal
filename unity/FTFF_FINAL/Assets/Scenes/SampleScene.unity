@@ -216,14 +216,39 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SourceA: {fileID: 273274193}
   SourceB: {fileID: 273274192}
-  soundTracks: []
-  fadeTime: 3
+  soundTracks:
+  - {fileID: 8300000, guid: 17c2c7aeb9362c543a230e18438273f6, type: 3}
+  - {fileID: 8300000, guid: ebd486b28ac550244b64b7a05e61e7cb, type: 3}
+  - {fileID: 8300000, guid: d52b648a22300bd49b024bc85ff3e2f9, type: 3}
+  - {fileID: 8300000, guid: b36ed8bddb1a96c41a48cd565f63eb75, type: 3}
+  - {fileID: 8300000, guid: 2d4e81628515d124092705bcd3aa3698, type: 3}
+  - {fileID: 8300000, guid: d7caab2f90e8bfb458bc0b105f9e42ed, type: 3}
+  - {fileID: 8300000, guid: 0416225644d322c4d93fbf6e1c74b21d, type: 3}
+  - {fileID: 8300000, guid: 0147ac8cf30a6cd42b4c90d5ba8af74b, type: 3}
+  - {fileID: 8300000, guid: ad4cefaa217aea348b68056cd1888abd, type: 3}
+  - {fileID: 8300000, guid: 7fedd029a0db2a240b1636f8ecfc03fb, type: 3}
+  - {fileID: 8300000, guid: ca793478c2916264b928a3df78b80ea5, type: 3}
+  - {fileID: 8300000, guid: 9368f010588b0164e9cc991edf8d5b94, type: 3}
+  - {fileID: 8300000, guid: cb33651c1a9d50041abdc0ab6079b7ac, type: 3}
+  - {fileID: 8300000, guid: 365072fc7ca93e643b0c578a9e964035, type: 3}
+  - {fileID: 8300000, guid: a4e7afff95cad604a9b87917b8ed196d, type: 3}
+  - {fileID: 8300000, guid: 6e65811a91421e14a910ddc948e2cd11, type: 3}
+  - {fileID: 8300000, guid: d439616778d472f49ac96376c60f16f7, type: 3}
+  - {fileID: 8300000, guid: 6f710f85ab1768e4696a019552741320, type: 3}
+  - {fileID: 8300000, guid: c6c4e1c814148d1418db0aaa3d4f22b6, type: 3}
+  - {fileID: 8300000, guid: d6ae6c90babbd0349a78825f271462fd, type: 3}
+  - {fileID: 8300000, guid: d52c032347f56f84694d9cddfe50d61c, type: 3}
+  - {fileID: 8300000, guid: 1fc70ce9b5170ef4c823fc8dec68195f, type: 3}
+  - {fileID: 8300000, guid: 1c23269532ad6054e86a12fb98e17789, type: 3}
+  fadeTime: 1
   dropdown: {fileID: 1492315808}
   connectButton: {fileID: 683225733}
   displayPage: {fileID: 1847384791}
   PageButton: {fileID: 861465811}
   possibleNames:
   - Fred the Forgetful Frog
+  exit: 0
+  paused: 0
 --- !u!114 &273274189
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1215,9 +1240,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 273274188}
+      - m_Target: {fileID: 273274186}
         m_TargetAssemblyTypeName: ConnectToBluetooth, Assembly-CSharp
-        m_MethodName: UpdateButtonText
+        m_MethodName: 
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

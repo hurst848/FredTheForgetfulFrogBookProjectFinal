@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,6 +13,23 @@ public class ConnectToBluetooth : MonoBehaviour
 		public string Address;
 		public string Name;
 	}
+
+    public class Characteristic
+    {
+        public string ServiceUUID;
+        public string CharacteristicUUID;
+        public bool Found;
+    }
+
+    public static List<Characteristic> Characteristics = new List<Characteristic>
+    {
+        new Characteristic { ServiceUUID = "705CC7B4-AD8D-40BA-9583-FCB7819ED284", CharacteristicUUID = "705CC7B4-AD8D-40BA-9583-FCB7819ED284", Found = false },
+    };
+
+    public Characteristic GetCharacteristic(string serviceUUID, string characteristicsUUID)
+    {
+        return Characteristics.Where(c => IsEqual(serviceUUID, c.ServiceUUID) && IsEqual(characteristicsUUID, c.CharacteristicUUID)).FirstOrDefault();
+    }
 
     public AudioSource SourceA;
     public AudioSource SourceB;
@@ -43,6 +61,10 @@ public class ConnectToBluetooth : MonoBehaviour
     private bool _startScan = true;
     private List<BLE_ScannedItem> _scannedItems;
 
+
+    public bool exit = false;
+    public bool paused = false;
+
     private bool connectedToDevice = false;
     // Start is called before the first frame update
     void Start()
@@ -66,7 +88,11 @@ public class ConnectToBluetooth : MonoBehaviour
         });
     }
 
-
+    void pauseSound()
+    {
+        if (paused) { paused = false; }
+        else { paused = true; }
+    }
 
     // Update is called once per frame
     void Update()
@@ -139,22 +165,7 @@ public class ConnectToBluetooth : MonoBehaviour
         }
         else
         {
-            if (Page_Number != lastPageNumber)
-            {
-                lastPageNumber = Page_Number;
-                if (currentSource) // SourceA is currently playing
-                {
-                    StartCoroutine(fadeOutAudio(SourceA, fadeTime));
-                    StartCoroutine(fadeInAudio(SourceB, fadeTime));
-                    currentSource = false;
-                }
-                else // SourceB is currently playing
-                {
-                    StartCoroutine(fadeOutAudio(SourceB, fadeTime));
-                    StartCoroutine(fadeInAudio(SourceA, fadeTime));
-                    currentSource = true;
-                }
-            }
+            displayPage.text = Page_Number.ToString();
         }
 
 	}
@@ -164,13 +175,32 @@ public class ConnectToBluetooth : MonoBehaviour
         PageButton.gameObject.SetActive(true);
 		connectedItem = _scannedItems[dropdown.value];
         connectedToDevice = true;
-        BluetoothLEHardwareInterface.SubscribeCharacteristicWithDeviceAddress(connectedItem.Address, "705CC7B4-AD8D-40BA-9583-FCB7819ED284", "705CC7B4-AD8D-40BA-9583-FCB7819ED284", null, (deviceAddress, characteristric, bytes) =>
-        {
-            Page_Number = int.Parse(BitConverter.ToString(bytes));
+        BluetoothLEHardwareInterface.StopScan();
+        BluetoothLEHardwareInterface.ConnectToPeripheral(connectedItem.Address, null, null, (address, serviceUUID, characteristicUUID) => {
+
+            var characteristic = GetCharacteristic(serviceUUID, characteristicUUID);
+            if (characteristic != null)
+            {
+                BluetoothLEHardwareInterface.Log(string.Format("Found {0}, {1}", serviceUUID, characteristicUUID));
+
+                characteristic.Found = true;
+
+            
+            }
+        }, (disconnectAddress) => {
+            
         });
+        //BluetoothLEHardwareInterface.SubscribeCharacteristicWithDeviceAddress(connectedItem.Address, Characteristics[0].ServiceUUID, Characteristics[0].CharacteristicUUID, null, (deviceAddress, characteristric, bytes) => {
+
+        //    Page_Number = int.Parse(BitConverter.ToString(bytes));
+        //});
+
         lastPageNumber = Page_Number;
 		dropdown.gameObject.SetActive(false);
 		connectButton.gameObject.SetActive(false);
+
+
+        StartCoroutine(runAudioStuff());
 	}
 
     public void UpdateButtonText()
@@ -189,10 +219,13 @@ public class ConnectToBluetooth : MonoBehaviour
             yield return new WaitForSeconds(incrmnt);
         }
 
+        _source.Pause();
         yield return null;
     }
     public IEnumerator fadeInAudio(AudioSource _source, float _timeToFade)
     {
+        _source.Play();
+
         float precision = 100.0f;
         float incrmnt = _timeToFade / precision;
 
@@ -203,5 +236,71 @@ public class ConnectToBluetooth : MonoBehaviour
         }
 
         yield return null;
+    }
+
+    private IEnumerator runAudioStuff()
+    {
+
+        while (!exit)
+        {
+            BluetoothLEHardwareInterface.ReadCharacteristic(connectedItem.Address, Characteristics[0].ServiceUUID, Characteristics[0].CharacteristicUUID, (characteristic, bytes) =>
+            {
+                BluetoothLEHardwareInterface.Log("Charateristic read: \n\n\n\n\n");
+
+                string test = System.Text.Encoding.Default.GetString(bytes);
+                BluetoothLEHardwareInterface.Log(test);
+                BluetoothLEHardwareInterface.Log("\n\n");
+
+                Page_Number = int.Parse(test);
+            });
+            if (!paused)
+            {
+                if (Page_Number != lastPageNumber && Page_Number != -1 && Page_Number <= soundTracks.Count && Page_Number > 0)
+                {
+                    lastPageNumber = Page_Number;
+                    if (currentSource) // SourceA is currently playing
+                    {
+                        StartCoroutine(fadeOutAudio(SourceA, fadeTime));
+                        SourceB.clip = soundTracks[Page_Number];
+                        StartCoroutine(fadeInAudio(SourceB, fadeTime));
+                        currentSource = false;
+                    }
+                    else // SourceB is currently playing
+                    {
+                        StartCoroutine(fadeOutAudio(SourceB, fadeTime));
+                        SourceA.clip = soundTracks[Page_Number];
+                        StartCoroutine(fadeInAudio(SourceA, fadeTime));
+                        currentSource = true;
+                    }
+                }
+                else if (Page_Number == -1 && (SourceA.clip != null && SourceB.clip != null))
+                {
+                    if (currentSource)
+                    {
+                        StartCoroutine(fadeOutAudio(SourceA, fadeTime));
+                    }
+                    else
+                    {
+                        StartCoroutine(fadeOutAudio(SourceB, fadeTime));
+                    }
+                }
+                
+            }
+
+            yield return new WaitForSeconds(fadeTime);
+        }
+
+        yield return null;
+    }
+    bool IsEqual(string uuid1, string uuid2)
+    {
+        return (uuid1.ToUpper().CompareTo(uuid2.ToUpper()) == 0);
+    }
+    private void OnApplicationQuit()
+    {
+        BluetoothLEHardwareInterface.DisconnectPeripheral(connectedItem.Address, (address) => {
+            // since we have a callback for disconnect in the connect method above, we don't
+            // need to process the callback here.
+        });
     }
 }
