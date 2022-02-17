@@ -7,7 +7,11 @@ using UnityEngine.UI;
 
 public class ConnectToBluetooth : MonoBehaviour
 {
-	struct BLE_ScannedItem
+    public Canvas OpenMenu;
+    public Canvas MainMenu;
+
+
+    struct BLE_ScannedItem
 	{
 		public string RSSI;
 		public string Address;
@@ -86,6 +90,8 @@ public class ConnectToBluetooth : MonoBehaviour
             if (error.Contains("Bluetooth LE Not Enabled"))
                 BluetoothLEHardwareInterface.BluetoothEnable(true);
         });
+        OpenMenu.gameObject.SetActive(true);
+        MainMenu.gameObject.SetActive(false);
     }
 
     void pauseSound()
@@ -172,7 +178,7 @@ public class ConnectToBluetooth : MonoBehaviour
 
 	public void ConnectToDevice()
     {
-        PageButton.gameObject.SetActive(true);
+        
 		connectedItem = _scannedItems[dropdown.value];
         connectedToDevice = true;
         BluetoothLEHardwareInterface.StopScan();
@@ -196,9 +202,9 @@ public class ConnectToBluetooth : MonoBehaviour
         //});
 
         lastPageNumber = Page_Number;
-		dropdown.gameObject.SetActive(false);
-		connectButton.gameObject.SetActive(false);
 
+        OpenMenu.gameObject.SetActive(false);
+        MainMenu.gameObject.SetActive(true);
 
         StartCoroutine(runAudioStuff());
 	}
